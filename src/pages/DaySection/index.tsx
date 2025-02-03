@@ -8,10 +8,16 @@ import { parse, differenceInMinutes } from "date-fns";
 // Sample Meeting Data
 const meetings = [
   {
+    title: "Standup Meeting",
+    startTime: "08:30 AM",
+    endTime: "09:00 AM",
+  },
+  {
     title: "Team Sync",
     startTime: "11:50 AM",
     endTime: "12:50 PM",
   },
+
   {
     title: "Team Sync",
     startTime: "12:50 PM",
@@ -43,97 +49,94 @@ export const DaySection = () => {
   };
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center">
-      <Box
-        borderRadius="9px"
-        background="#fff"
-        margin={20}
-        width="60%"
-        minHeight="100vh"
-        padding={10}
-      >
-        {/* Date Header */}
-        <Box textAlign="center" fontWeight="bold" fontSize="lg">
-          {useMeeting().selectedDateFormatted}
-        </Box>
+    <Box
+      borderRadius="9px"
+      background="#fff"
+      width="100%"
+      padding={10}
+      maxHeight={"100vh"}
+      overflow={"scroll"}
+    >
+      {/* Date Header */}
+      <Box textAlign="center" fontWeight="bold" fontSize="lg">
+        {useMeeting().selectedDateFormatted}
+      </Box>
 
-        {/* Time Grid */}
-        <Grid templateColumns="80px 1fr" position="relative">
-          {/* Time Column */}
-          <VStack spacing={0} align="stretch">
-            {times
-              .filter((_, i) => i % 2 === 0)
-              .map((time) => (
+      {/* Time Grid */}
+      <Grid templateColumns="80px 1fr" position="relative">
+        {/* Time Column */}
+        <VStack spacing={0} align="stretch">
+          {times
+            .filter((_, i) => i % 2 === 0)
+            .map((time) => (
+              <Box
+                key={time}
+                h="60px"
+                display="flex"
+                alignItems="flex-start"
+                justifyContent="flex-end"
+                pr={2}
+              >
+                <Text fontSize="xs">{time}</Text>
+              </Box>
+            ))}
+        </VStack>
+
+        {/* Meeting Slots */}
+        <VStack spacing={0} align="stretch" position="relative">
+          {times
+            .filter((_, i) => i % 2 === 0)
+            .map((time, index) => {
+              return (
                 <Box
-                  key={time}
+                  key={index}
                   h="60px"
                   display="flex"
-                  alignItems="flex-start"
-                  justifyContent="flex-end"
-                  pr={2}
+                  alignItems="start"
+                  justifyContent="center"
+                  borderBottom="1px solid gray"
+                  borderLeft="2px solid gray"
+                  bg={"transparent"}
+                  color="white"
+                  fontWeight="bold"
+                  cursor={"pointer"}
+                  onClick={() => openModalHandler(time, index)}
+                  position="relative"
                 >
-                  <Text fontSize="xs">{time}</Text>
+                  {meetings
+                    .filter(
+                      (data) =>
+                        data.startTime.split(":")[0] === time.split(":")[0]
+                    )
+
+                    .map((meeting, i) => (
+                      <Box
+                        key={i}
+                        position="absolute"
+                        left={0}
+                        zIndex={999}
+                        top={`${getMinutesFromTime(meeting.startTime)}px`}
+                        h={`${getTimeDifference(
+                          meeting.startTime,
+                          meeting.endTime
+                        )}px`}
+                        bg={"red.100"}
+                        w={"100%"}
+                        textAlign="center"
+                        fontSize="sm"
+                        fontWeight="bold"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        {meeting.title}
+                      </Box>
+                    ))}
                 </Box>
-              ))}
-          </VStack>
-
-          {/* Meeting Slots */}
-          <VStack spacing={0} align="stretch" position="relative">
-            {times
-              .filter((_, i) => i % 2 === 0)
-              .map((time, index) => {
-                return (
-                  <Box
-                    key={index}
-                    h="60px"
-                    display="flex"
-                    alignItems="start"
-                    justifyContent="center"
-                    borderBottom="1px solid gray"
-                    borderLeft="2px solid gray"
-                    bg={"transparent"}
-                    color="white"
-                    fontWeight="bold"
-                    cursor={"pointer"}
-                    onClick={() => openModalHandler(time, index)}
-                    position="relative"
-                  >
-                    {meetings
-                      .filter(
-                        (data) =>
-                          data.startTime.split(":")[0] === time.split(":")[0]
-                      )
-
-                      .map((meeting, i) => (
-                        <Box
-                          key={i}
-                          position="absolute"
-                          left={0}
-                          top={`${getMinutesFromTime(meeting.startTime)}px`}
-                          h={`${getTimeDifference(
-                            meeting.startTime,
-                            meeting.endTime
-                          )}px`}
-                          bg={"red.100"}
-                          w={"100%"}
-                          textAlign="center"
-                          fontSize="sm"
-                          fontWeight="bold"
-                          borderTop="1px solid red"
-                          borderBottom="1px solid red"
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="center"
-                        >
-                          {meeting.title}
-                        </Box>
-                      ))}
-                  </Box>
-                );
-              })}
-          </VStack>
-        </Grid>
-      </Box>
+              );
+            })}
+        </VStack>
+      </Grid>
 
       {/* Meeting Modal */}
       <MeetingModal isOpen={isOpen} onClose={onClose} />
